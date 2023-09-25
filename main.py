@@ -8,7 +8,7 @@ from datetime import date
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Table, Column, Integer, ForeignKey
-from sqlalchemy.orm import relationship, Mapped, mapped_column, DeclarativeBase
+from sqlalchemy.orm import relationship
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
 from flask_gravatar import Gravatar
@@ -17,8 +17,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from typing import List
 
 
-class Base(DeclarativeBase):
-    pass
+
 
 
 app = Flask(__name__)
@@ -61,8 +60,7 @@ class User(db.Model, UserMixin):
     name = db.Column(db.String(250), nullable=False)
     password = db.Column(db.String(250), nullable=False)
     posts = relationship("BlogPost", back_populates='author')
-    comments: Mapped[List["Comment"]] = relationship(
-        back_populates="comment_author")
+
 
 
 class BlogPost(db.Model):
@@ -75,18 +73,16 @@ class BlogPost(db.Model):
     img_url = db.Column(db.String(250), nullable=False)
     author_id = db.Column(Integer, ForeignKey('users.id'))
     author = relationship("User", back_populates='posts')
-    comments: Mapped[List["Comment"]] = relationship(
-        back_populates="parrent_post")
+
+
 
 
 class Comment(db.Model):
     __tablename__ = "comments"
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.Text, nullable=False)
-    author_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    comment_author: Mapped["User"] = relationship(back_populates="comments")
-    post_id: Mapped[int] = mapped_column(ForeignKey("blog_posts.id"))
-    parrent_post: Mapped["BlogPost"] = relationship(back_populates="comments")
+
+
 
 
 with app.app_context():
